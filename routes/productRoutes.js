@@ -1,7 +1,8 @@
-// === Updated routes/productRoutes.js ===
-import express from "express";
-import Product from "../models/Product.js";
-import { sendExpiryWarningEmail } from "../utils/mailer.js";
+
+const express = require("express");
+const Product = require("../models/Product");
+const Order = require("../models/Order")
+const { sendExpiryWarningEmail } = require("../utils/mailer");
 
 const router = express.Router();
 

@@ -1,7 +1,7 @@
-import express from "express";
-import Product from "../models/Product.js";
-import Order from "../models/Order.js";
-import { sendLowStockEmail } from "../utils/mailer.js";
+const express = require("express");
+const Product = require("../models/Product");
+const Order = require("../models/Order");
+const { sendLowStockEmail } = require("../utils/mailer");
 
 const router = express.Router();
 // Add this after the POST / route
@@ -34,7 +34,7 @@ router.post("/", async (req, res) => {
     if (!product || product.quantity < item.quantity) {
       return res
         .status(400)
-        .json({ error: `Product out of stock: ${item.productId}` });
+        .json({ error: `${product.name} is out of stock` });
     }
 
     const itemTotal = product.price * item.quantity;
