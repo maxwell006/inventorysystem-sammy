@@ -21,6 +21,15 @@ router.post("/", async (req, res) => {
     });
   }
 
+  const now = new Date();
+  const expiry = new Date(expiryDate);
+
+  if (expiry <= now) {
+    return res.status(400).json({
+      error: "Expiry date must be a future date",
+    });
+  }
+
   const existingProduct = await Product.findOne({
     name: { $regex: `^${name}$`, $options: "i" },
   });
@@ -34,6 +43,7 @@ router.post("/", async (req, res) => {
   await product.save();
   res.json({ message: "Product added", product });
 });
+
 
 // Get all products and check for expiry warning
 router.get("/", async (req, res) => {
