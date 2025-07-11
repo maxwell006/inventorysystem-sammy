@@ -1,10 +1,12 @@
-
-const express = require("express");
-const Product = require("../models/Product");
-const Order = require("../models/Order")
-const { sendExpiryWarningEmail } = require("../utils/mailer");
+// === Updated routes/productRoutes.js ===
+import express from "express";
+import Product from "../models/Product.js";
+import Order from "../models/Order.js";
+import { sendLowStockEmail } from "../utils/mailer.js";
 
 const router = express.Router();
+
+
 
 // Create product
 router.post("/", async (req, res) => {

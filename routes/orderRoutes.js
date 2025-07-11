@@ -1,7 +1,7 @@
-const express = require("express");
-const Product = require("../models/Product");
-const Order = require("../models/Order");
-const { sendLowStockEmail } = require("../utils/mailer");
+import express from "express";
+import Product from "../models/Product.js";
+import Order from "../models/Order.js";
+import { sendLowStockEmail } from "../utils/mailer.js";
 
 const router = express.Router();
 // Add this after the POST / route

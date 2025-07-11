@@ -1,6 +1,6 @@
-const express = require("express");
-const Order = require("../models/Order");
-const { sendSalesSummaryEmail } = require("../utils/mailer");
+import express from "express";
+import Order from "../models/Order.js";
+import { sendSalesSummaryEmail } from "../utils/mailer.js";
 
 const router = express.Router();
 
