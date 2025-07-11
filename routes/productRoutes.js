@@ -26,7 +26,7 @@ router.post("/", async (req, res) => {
 
   if (expiry <= now) {
     return res.status(400).json({
-      error: "Expiry date must be a future date",
+      error: "Expiry date must be future date",
     });
   }
 
@@ -106,6 +106,37 @@ router.put("/:id", async (req, res) => {
 
   res.json({ message: "Product updated", product: updated });
 });
+
+// PATCH /products/:id - Update only the quantity
+router.patch("/:id", async (req, res) => {
+  const { quantity } = req.body;
+
+  if (quantity == null) {
+    return res.status(400).json({ error: "Quantity is required" });
+  }
+
+  if (typeof quantity !== "number" || quantity < 0) {
+    return res.status(400).json({ error: "Quantity must be a non-negative number" });
+  }
+
+  try {
+    const updatedProduct = await Product.findByIdAndUpdate(
+      req.params.id,
+      { quantity },
+      { new: true }
+    );
+
+    if (!updatedProduct) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+
+    res.json({ message: "Quantity updated", product: updatedProduct });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 
 // Delete product
 router.delete("/:id", async (req, res) => {
