@@ -4,7 +4,8 @@ const productSchema = new mongoose.Schema({
   name: String,
   price: Number,
   quantity: Number,
-  expiryDate: { type: Date }
+  expiryDate: { type: Date },
+  image: { type: String }, 
 });
 
 export default mongoose.model('Product', productSchema);
