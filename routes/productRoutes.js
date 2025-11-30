@@ -75,20 +75,20 @@ router.post("/", upload.single("image"), async (req, res) => {
 router.get("/", async (req, res) => {
   const products = await Product.find();
 
-  const now = new Date();
-  const threeDaysFromNow = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
+  // const now = new Date();
+  // const threeDaysFromNow = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
 
-  for (const product of products) {
-    // Expiry warning
-    if (product.expiryDate && new Date(product.expiryDate) <= threeDaysFromNow) {
-      await sendExpiryWarningEmail(product.name, product.expiryDate);
-    }
+  // for (const product of products) {
+  //   // Expiry warning
+  //   if (product.expiryDate && new Date(product.expiryDate) <= threeDaysFromNow) {
+  //     await sendExpiryWarningEmail(product.name, product.expiryDate);
+  //   }
 
-    // Low stock warning
-    if (product.quantity < 10) {
-      await sendLowStockEmail(product.name);
-    }
-  }
+  //   // Low stock warning
+  //   if (product.quantity < 10) {
+  //     await sendLowStockEmail(product.name);
+  //   }
+  // }
 
   // Sort newest first
   const sortedProducts = products.sort(
@@ -98,6 +98,38 @@ router.get("/", async (req, res) => {
   res.json({ products: sortedProducts });
 });
 
+router.get("/send-alerts", async (req, res) => {
+  try {
+    const products = await Product.find();
+
+    const now = new Date();
+    const threeDaysFromNow = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
+
+    let sentCount = 0;
+
+    for (const p of products) {
+      const expiry = new Date(p.expiryDate);
+
+      if (expiry < now) {
+        await sendExpiryWarningEmail(p.name, p.expiryDate);
+        sentCount++;
+      }
+
+      if (expiry >= now && expiry <= threeDaysFromNow) {
+        await sendExpiryWarningEmail(p.name, p.expiryDate);
+        sentCount++;
+      }
+    }
+
+    res.json({
+      message: "Expiry alerts sent to admin",
+      totalEmailsSent: sentCount,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to send alerts" });
+  }
+});
 
 // ================================================
 // GET SINGLE PRODUCT
