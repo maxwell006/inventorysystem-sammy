@@ -32,6 +32,10 @@ router.post("/", async (req, res) => {
 
   let total = 0;
   const orderItems = [];
+  const lowStockProducts = [];
+  const expiringProducts = [];
+
+  const now = new Date();
 
   for (const item of items) {
     const product = await Product.findById(item.productId);
@@ -39,10 +43,8 @@ router.post("/", async (req, res) => {
       return res.status(404).json({ error: "Product not found" });
     }
 
-    const now = new Date();
     const expiry = new Date(product.expiryDate);
 
-    // Prevent ordering expired products
     if (expiry <= now) {
       return res
         .status(400)
@@ -62,16 +64,11 @@ router.post("/", async (req, res) => {
 
     product.quantity -= item.quantity;
 
-    // Send low stock email if quantity <= 10
-    if (product.quantity <= 10) {
-      await sendLowStockEmail(product.name);
-    }
+    if (product.quantity <= 10) lowStockProducts.push(product.name);
 
-    // Send expiry warning email if expiry is within 30 days
     const diffDays = Math.ceil((expiry - now) / (1000 * 60 * 60 * 24));
-    if (diffDays <= 30) {
-      await sendExpiryWarningEmail(product.name, product.expiryDate);
-    }
+    if (diffDays <= 30)
+      expiringProducts.push({ name: product.name, expiry: product.expiryDate });
 
     await product.save();
 
@@ -91,6 +88,20 @@ router.post("/", async (req, res) => {
   await order.save();
 
   res.json({ message: "Order placed successfully", order });
+
+  // ---- Send emails asynchronously, AFTER response ----
+  setImmediate(async () => {
+    try {
+      for (const name of lowStockProducts) {
+        await sendLowStockEmail(name);
+      }
+      for (const prod of expiringProducts) {
+        await sendExpiryWarningEmail(prod.name, prod.expiry);
+      }
+    } catch (err) {
+      console.error("Failed to send email:", err);
+    }
+  });
 });
 
 export default router;
